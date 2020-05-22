@@ -1,37 +1,45 @@
 import socket
-from time import sleep
+
+while True:
+    port = input('Введите порт от 1024 до 65535: \n')
+    if not port.isnumeric():
+        print('Ошибка')
+    elif 1023 <= int(port) <= 65535:
+        break
+    else:
+        print('Ошибка: порт не входит в нужный диапазон')
+
+while True:
+    address = input('Введите ip сервера или оставьте пустым для значения localhost: \n')
+    if address == '':
+        address = 'localhost'
+        break
+    else:
+        break
 
 sock = socket.socket()
+sock.setblocking(True)
+sock.connect((address, int(port)))
 
-host = input('Введите имя хоста:')
-if host == 'localhost':
-    pass
+auth = sock.recv(1024).decode()
+print(auth)
+if auth[0] == 'I':
+    sock.send(input().encode())
+    print(sock.recv(1024).decode())
+    sock.send(input().encode())
 else:
-    if any(c.isalpha() for c in host) == True:
-        print('некорректное имя хоста.По умолчанию локальный хост')
-        host = 'localhost'
-    else:
-        host_lst = host.split('.')
-        for i in host_lst:
-            if 0 <= int(i) <= 255:
-                pass
-            else:
-                host = 'localhost'
-                print('Некорректное имя хоста.По умолчанию локальный хост')
+    print(sock.recv(1024).decode())
+while True:
+    sock.send(input().encode())
+    answer = sock.recv(1024).decode()
+    print(answer)
+    if answer[0] == 'C':
+        break
 
-try:
-    port = int(input('номер порта:'))
-    if 0 <= port <= 65535:
-        pass
-    else:
-        print('некорректный номер порта. порт по умолчанию 9090')
-        port = 9090
-
-except ValueError:
-    print("Некорректный номер порта. по умолчанию 9090")
-    port = 9090
-
-sock.connect((host, port))
-
-print('exit для завершения работы с сервером')
-msg = ''
+while True:
+    mesg = input("Input message: ")
+    if mesg == "exit":
+        sock.close()
+        break
+    sock.send(mesg.encode())
+    data = sock.recv(1024)
